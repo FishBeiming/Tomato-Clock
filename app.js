@@ -578,7 +578,24 @@ function saveLocalState() {
 async function syncCloudNow(options = {}) {
   const { quiet = false, showStatus = false } = options;
 
-  if (!cloud.client || !cloud.user || cloud.isSyncing) {
+  if (!cloud.client) {
+    if (!quiet || showStatus) {
+      setSyncStatus("Supabase 还没有初始化完成，请刷新页面后重试。", "error");
+    }
+    return false;
+  }
+
+  if (!cloud.user) {
+    if (!quiet || showStatus) {
+      setSyncStatus("请先登录账号，再执行同步。", "error");
+    }
+    return false;
+  }
+
+  if (cloud.isSyncing) {
+    if (!quiet || showStatus) {
+      setSyncStatus("正在同步中，请稍等。", "muted");
+    }
     return false;
   }
 
@@ -980,6 +997,7 @@ function renderAccountState(options = {}) {
   elements.accountButton.classList.toggle("is-signed-in", Boolean(cloud.user));
   elements.authForm.hidden = !configured || Boolean(cloud.user);
   elements.accountActions.hidden = !configured || !cloud.user;
+  elements.syncNowButton.disabled = !configured || !cloud.user || cloud.isSyncing;
   elements.accountEmail.textContent = cloud.user?.email || (configured ? "未登录" : "未配置 Supabase");
 
   if (keepStatus) {
