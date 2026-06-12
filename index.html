@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="一个可部署到 Vercel 的沉浸式番茄钟网页，支持背景图片、电子时钟和翻页倒计时。"
+    />
+    <title>Tomato Clock</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" id="appShell">
+      <div class="background-layer" id="backgroundLayer"></div>
+      <div class="shade-layer" id="shadeLayer"></div>
+
+      <header class="top-bar" aria-label="顶部状态栏">
+        <section class="quote-block" aria-label="今日句子">
+          <span class="quote-mark">“</span>
+          <p id="quoteText">有源之水，寒冽不冻；有德之人，厄穷不塞。</p>
+        </section>
+
+        <nav class="icon-actions" aria-label="快捷操作">
+          <button class="icon-button" id="backgroundButton" type="button" aria-label="更换背景">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5z" />
+              <path d="m4.8 17.2 4.5-4.5a2 2 0 0 1 2.8 0l.7.7 2.1-2.1a2 2 0 0 1 2.8 0l1.5 1.5" />
+              <circle cx="8.5" cy="7.8" r="1.5" />
+            </svg>
+            <span class="tooltip">背景</span>
+          </button>
+          <button class="icon-button" id="displayButton" type="button" aria-label="切换倒计时样式">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+              <path d="M4 12h16" />
+              <path d="M9 8h6" />
+              <path d="M9 16h6" />
+            </svg>
+            <span class="tooltip">样式</span>
+          </button>
+          <button class="icon-button" id="settingsButton" type="button" aria-label="打开设置">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1A1.7 1.7 0 0 0 4.6 15 1.7 1.7 0 0 0 3 14H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L4.2 7A2 2 0 1 1 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
+            </svg>
+            <span class="tooltip">设置</span>
+          </button>
+          <button class="icon-button" id="accountButton" type="button" aria-label="账号与云同步">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M20 21a8 8 0 0 0-16 0" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span class="tooltip">账号</span>
+          </button>
+          <button class="icon-button" id="heatmapButton" type="button" aria-label="查看专注热力图">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M4 4h4v4H4z" />
+              <path d="M10 4h4v4h-4z" />
+              <path d="M16 4h4v4h-4z" />
+              <path d="M4 10h4v4H4z" />
+              <path d="M10 10h4v4h-4z" />
+              <path d="M16 10h4v4h-4z" />
+              <path d="M4 16h4v4H4z" />
+              <path d="M10 16h4v4h-4z" />
+              <path d="M16 16h4v4h-4z" />
+            </svg>
+            <span class="tooltip">热力图</span>
+          </button>
+        </nav>
+      </header>
+
+      <section class="timer-stage" aria-label="番茄钟">
+        <div class="mode-tabs" role="tablist" aria-label="计时模式">
+          <button class="mode-tab is-active" type="button" data-mode="focus" role="tab">专注</button>
+          <button class="mode-tab" type="button" data-mode="short" role="tab">短休息</button>
+          <button class="mode-tab" type="button" data-mode="long" role="tab">长休息</button>
+        </div>
+
+        <article class="timer-ring" id="timerRing">
+          <svg class="progress-svg" viewBox="0 0 360 360" aria-hidden="true">
+            <circle class="progress-track" cx="180" cy="180" r="160"></circle>
+            <circle class="progress-value" id="progressValue" cx="180" cy="180" r="160"></circle>
+          </svg>
+          <div class="timer-content">
+            <input class="session-title" id="sessionTitle" value="考研" aria-label="专注主题" />
+            <div class="time-display digital-display" id="digitalDisplay" aria-live="polite">25:00</div>
+            <div class="time-display flip-display" id="flipDisplay" aria-live="polite" hidden>
+              <span class="flip-card" data-kind="minutes">
+                <span class="flip-static flip-top"><span data-role="top">25</span></span>
+                <span class="flip-static flip-bottom"><span data-role="bottom">25</span></span>
+                <span class="flip-sheet" aria-hidden="true">
+                  <span class="flip-sheet-face flip-sheet-front"><span data-role="front">25</span></span>
+                  <span class="flip-sheet-face flip-sheet-back"><span data-role="back">25</span></span>
+                </span>
+                <span class="flip-value sr-only" id="flipMinutes">25</span>
+              </span>
+              <span class="flip-separator">:</span>
+              <span class="flip-card" data-kind="seconds">
+                <span class="flip-static flip-top"><span data-role="top">00</span></span>
+                <span class="flip-static flip-bottom"><span data-role="bottom">00</span></span>
+                <span class="flip-sheet" aria-hidden="true">
+                  <span class="flip-sheet-face flip-sheet-front"><span data-role="front">00</span></span>
+                  <span class="flip-sheet-face flip-sheet-back"><span data-role="back">00</span></span>
+                </span>
+                <span class="flip-value sr-only" id="flipSeconds">00</span>
+              </span>
+            </div>
+            <p class="session-state" id="sessionState">准备专注</p>
+          </div>
+        </article>
+
+        <p class="habit-line" id="habitLine">习惯-今日 0/400 分钟</p>
+
+        <section class="transport" aria-label="计时控制">
+          <button class="round-control" id="resetButton" type="button" aria-label="重置">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M3 12a9 9 0 1 0 3-6.7" />
+              <path d="M3 4v5h5" />
+            </svg>
+          </button>
+          <button class="primary-control" id="startPauseButton" type="button" aria-label="开始">
+            <svg class="play-icon" aria-hidden="true" viewBox="0 0 24 24">
+              <path d="m8 5 11 7-11 7Z" />
+            </svg>
+            <svg class="pause-icon" aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M8 5v14" />
+              <path d="M16 5v14" />
+            </svg>
+          </button>
+          <button class="round-control" id="skipButton" type="button" aria-label="跳过">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="m5 4 10 8-10 8Z" />
+              <path d="M19 5v14" />
+            </svg>
+          </button>
+        </section>
+      </section>
+
+      <aside class="side-panel" id="sidePanel" aria-label="应用面板" hidden>
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker" id="panelKicker">背景</p>
+            <h2 id="panelTitle">更换背景</h2>
+          </div>
+          <button class="icon-button panel-close" id="closePanelButton" type="button" aria-label="关闭">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="panel-page is-active" id="backgroundPanel" data-panel="background">
+          <div class="background-grid" id="backgroundGrid"></div>
+          <label class="field">
+            <span>图片地址</span>
+            <input id="backgroundUrlInput" type="url" placeholder="https://..." autocomplete="off" />
+          </label>
+          <label class="file-field">
+            <input id="backgroundFileInput" type="file" accept="image/*" />
+            <span>选择本地图片</span>
+          </label>
+          <label class="range-field">
+            <span>遮罩</span>
+            <input id="shadeRange" type="range" min="20" max="70" value="38" />
+          </label>
+        </div>
+
+        <div class="panel-page" id="displayPanel" data-panel="display">
+          <div class="segmented" role="radiogroup" aria-label="倒计时样式">
+            <button class="segment is-active" type="button" data-display="digital" role="radio" aria-checked="true">
+              电子时钟
+            </button>
+            <button class="segment" type="button" data-display="flip" role="radio" aria-checked="false">
+              翻页
+            </button>
+          </div>
+          <label class="range-field">
+            <span>圆环粗细</span>
+            <input id="ringWidthRange" type="range" min="5" max="14" value="7" />
+          </label>
+          <label class="range-field">
+            <span>圆环缺口</span>
+            <input id="ringGapRange" type="range" min="0" max="70" value="22" />
+          </label>
+        </div>
+
+        <div class="panel-page" id="heatmapPanel" data-panel="heatmap">
+          <div class="heatmap-toolbar">
+            <button class="month-button" id="prevMonthButton" type="button" aria-label="上个月">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <div class="heatmap-heading">
+              <h3 id="heatmapTitle">2026-06</h3>
+              <p id="heatmapSummary">本月 0.0h</p>
+            </div>
+            <button class="month-button" id="nextMonthButton" type="button" aria-label="下个月">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="heatmap-actions">
+            <button class="panel-secondary" id="heatmapTodayButton" type="button">回到本月</button>
+            <button class="panel-secondary" id="toggleHeatmapLabelsButton" type="button">隐藏时长</button>
+          </div>
+          <div class="heatmap-weekdays" aria-hidden="true">
+            <span>一</span>
+            <span>二</span>
+            <span>三</span>
+            <span>四</span>
+            <span>五</span>
+            <span>六</span>
+            <span>日</span>
+          </div>
+          <div class="heatmap-grid" id="heatmapGrid"></div>
+        </div>
+
+        <div class="panel-page" id="settingsPanel" data-panel="settings">
+          <div class="settings-grid">
+            <label class="number-field">
+              <span>专注</span>
+              <input id="focusMinutesInput" type="number" min="1" max="180" value="25" />
+            </label>
+            <label class="number-field">
+              <span>短休息</span>
+              <input id="shortMinutesInput" type="number" min="1" max="60" value="5" />
+            </label>
+            <label class="number-field">
+              <span>长休息</span>
+              <input id="longMinutesInput" type="number" min="1" max="120" value="15" />
+            </label>
+            <label class="number-field wide">
+              <span>今日目标</span>
+              <input id="dailyGoalInput" type="number" min="1" max="1440" value="400" />
+            </label>
+          </div>
+          <label class="toggle-row">
+            <span>提示音</span>
+            <input id="soundToggle" type="checkbox" checked />
+          </label>
+          <button class="panel-action" id="resetStatsButton" type="button">清空今日记录</button>
+        </div>
+
+        <div class="panel-page" id="accountPanel" data-panel="account">
+          <section class="account-card">
+            <p class="account-label">当前账号</p>
+            <p class="account-email" id="accountEmail">未登录</p>
+            <p class="sync-status" id="syncStatus">正在检查云同步配置</p>
+          </section>
+
+          <form class="auth-form" id="authForm">
+            <label class="field">
+              <span>邮箱</span>
+              <input id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com" />
+            </label>
+            <label class="field">
+              <span>密码</span>
+              <input id="authPasswordInput" type="password" autocomplete="current-password" placeholder="至少 6 位" />
+            </label>
+            <div class="button-row">
+              <button class="panel-action" id="authLoginButton" type="submit">登录</button>
+              <button class="panel-secondary" id="authRegisterButton" type="button">注册</button>
+            </div>
+          </form>
+
+          <div class="account-actions" id="accountActions" hidden>
+            <button class="panel-action" id="syncNowButton" type="button">立即同步</button>
+            <button class="panel-secondary" id="signOutButton" type="button">退出登录</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="cycle-dialog" id="cycleDialog" role="dialog" aria-modal="true" aria-labelledby="cycleDialogTitle" hidden>
+        <div class="cycle-dialog-card">
+          <p class="panel-kicker">短休息结束</p>
+          <h2 id="cycleDialogTitle">开始下一轮专注吗？</h2>
+          <p>点击开始会立即计时；先停一下会回到专注页面并保持暂停。</p>
+          <div class="button-row">
+            <button class="panel-action" id="confirmNextCycleButton" type="button">开始下一轮</button>
+            <button class="panel-secondary" id="cancelNextCycleButton" type="button">先停一下</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="./supabase-config.js" defer></script>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
