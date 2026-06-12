@@ -775,8 +775,8 @@ function ensureTodayStats() {
 }
 
 function seedQuote() {
-  const dayIndex = new Date().getDate() % quotes.length;
-  elements.quoteText.textContent = quotes[dayIndex];
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  elements.quoteText.textContent = quotes[randomIndex];
 }
 
 function hydrateControls() {
